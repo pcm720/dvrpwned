@@ -1,0 +1,24 @@
+{
+  "input_udm": "DVRP_FIRMWARE_131.udm",
+  "output_udm": "build/sce_security_patch_131.udm",
+  "linker_script": "linker/131.ld",
+  "payloads": [
+    {
+      "source": "src/sce_security_patch.c",
+      "vaddr": "0x10033B20"
+    }
+  ],
+  "files": [
+    {
+      "source": "tools/hddid.bin",
+      "vaddr": "0x10033900"
+    }
+  ],
+  "hooks": [
+    {"type": "raw", "vaddr": "0x10033B00", "expected": "FFFFFFFF", "bytes": "00000000"},
+    {"type": "call32_target", "vaddr": "0x10007b60", "target": "0x0", "helper_symbol": "sceAtaGetSceIdWrapper", "helper_payload": "src/sce_security_patch.c"},
+    {"type": "call32_target", "vaddr": "0x1001995e", "target": "0x0", "helper_symbol": "sceAtaGetSceIdWrapper", "helper_payload": "src/sce_security_patch.c"},
+    {"type": "call32_target", "vaddr": "0x1000b224", "target": "0x0", "helper_symbol": "sceAtaExecCmdWrapper", "helper_payload": "src/sce_security_patch.c"},
+    {"type": "call32_target", "vaddr": "0x1000b234", "target": "0x0", "helper_symbol": "sceAtaWaitResultWrapper", "helper_payload": "src/sce_security_patch.c"}
+  ]
+}
