@@ -122,6 +122,15 @@ def apply_patch(udm_path, manifest_path, output_path=None):
                       file=sys.stderr)
             suffix = data[fileoff+6:fileoff+8]
             new_bytes = prefix + struct.pack('>I', target) + suffix
+        elif htype == 'jmp32_target':
+            target = parse_int(h.get('target', 0))
+            helper_symbol = h.get('helper_symbol')
+            helper_payload = h.get('helper_payload')
+            if helper_symbol and helper_payload:
+                helper_addr = find_symbol(helper_symbol, helper_payload)
+                if helper_addr is not None:
+                    target = helper_addr
+            new_bytes = b'\x9f\x8c' + struct.pack('>I', target) + b'\x97\x0c'
         else:
             raise ValueError(f'unknown hook type {htype}')
 
@@ -130,11 +139,11 @@ def apply_patch(udm_path, manifest_path, output_path=None):
             actual = data[fileoff:fileoff+len(expected)]
             if actual != expected:
                 raise RuntimeError(
-                    f'hook at 0x{vaddr:08x}: expected {expected.hex()}, found {actual.hex()}')
+                    f'hook "{h['name']:}":\n\tat 0x{vaddr:08x}: expected {expected.hex()}, found {actual.hex()}')
 
         end = fileoff + len(new_bytes)
         data[fileoff:end] = new_bytes
-        print(f'hook 0x{vaddr:08x}: {new_bytes.hex()}')
+        print(f'hook"{h['name']}" type {htype}:\n\t0x{vaddr:08x}: {new_bytes.hex()}')
 
     out_path = output_path or manifest['output_udm']
     out_path = os.path.join(ROOT, out_path) if not os.path.isabs(out_path) else out_path
