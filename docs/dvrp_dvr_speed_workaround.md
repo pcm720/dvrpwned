@@ -1,4 +1,3 @@
-
 # DVRP DVR-SPEED workaround for HDD authentication
 
 Usually, DVR-SPEED does not allow DMA commands (e.g. DMA read/write) until the 0x8e command is received.  
