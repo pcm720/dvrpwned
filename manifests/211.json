@@ -1,0 +1,172 @@
+{
+  "input_udm": "DVRP_FIRMWARE_211.udm",
+  "output_udm": "build/dvrpwned_211.udm",
+  "linker_script": "linker/211.ld",
+  "payloads": [
+    {
+      "source": "src/sce_security_patch.c",
+      "vaddr": "0x1006a620"
+    },
+    {
+      "source": "src/ataemu_patch.c",
+      "vaddr": "0x1006a760"
+    },
+    {
+      "source": "src/misc_devctl_patch.c",
+      "vaddr": "0x1006acb0"
+    }
+  ],
+  "files": [
+    {
+      "source": "tools/hddid.bin",
+      "vaddr": "0x1006a400"
+    }
+  ],
+  "hooks": [
+    {
+      "name": "Patch DVRP firmware version",
+      "comment": "05 - CFW, 2 - DVRPwned major version, 0 - DVRPwned minor version",
+      "type": "raw",
+      "vaddr": "0x1005f61c",
+      "expected": "0206",
+      "bytes": "0520"
+    },
+    { "name": "Initialize CMD_STATE to 0",
+      "type": "raw",
+      "vaddr": "0x1006a600",
+      "expected": "FFFFFFFF",
+      "bytes": "00000000"
+    },
+    { "name": "Initialize ATAEMU_CMD to 0",
+      "type": "raw",
+      "vaddr": "0x1006a604",
+      "expected": "FFFFFFFF",
+      "bytes": "00000000"
+    },
+    {
+      "name": "ATAD: replace sceAtaGetSceId call in the device init function",
+      "type": "call32_target",
+      "vaddr": "0x10008dcc",
+      "target": "0x0",
+      "helper_symbol": "sceAtaGetSceIdWrapper",
+      "helper_payload": "src/sce_security_patch.c"
+    },
+    {
+      "name": "ATAD: replace sceAtaGetSceId call in the ps2hdd devctl handler",
+      "type": "call32_target",
+      "vaddr": "0x1001e388",
+      "target": "0x0",
+      "helper_symbol": "sceAtaGetSceIdWrapper",
+      "helper_payload": "src/sce_security_patch.c"
+    },
+    {
+      "name": "ATAEmu: replace ataemuParseCommand with the custom LBA48-aware parser",
+      "type": "call32_target",
+      "vaddr": "0x1000e60a",
+      "target": "0x0",
+      "helper_symbol": "ataemuParseCommand",
+      "helper_payload": "src/ataemu_patch.c"
+    },
+    {
+      "name": "ATAEmu: patch the command handler to always call the patched LBA28 DMA handler instead of selecting between LBA28 and LBA48 handlers",
+      "type": "raw",
+      "vaddr": "0x1000e71e",
+      "expected": "4f04",
+      "bytes": "e00a"
+    },
+    {
+      "name": "ATAEmu: replace sceAtaExecCmd in non-data proxy with LBA48-aware implementation",
+      "type": "call32_target",
+      "vaddr": "0x1000de1c",
+      "target": "0x0",
+      "helper_symbol": "sceAtaExecCmdWrapper",
+      "helper_payload": "src/ataemu_patch.c"
+    },
+    {
+      "name": "ATAEmu: replace nsector handling in read proxy to always pass the nsector value through instead of ceiling to 0x100",
+      "type": "raw",
+      "vaddr": "0x1000deda",
+      "expected": "e204",
+      "bytes": "9fa0"
+    },
+    {
+      "name": "ATAEmu: replace sceAtaExecCmd in read proxy with LBA48/custom HDD ID-aware implementation",
+      "type": "call32_target",
+      "vaddr": "0x1000df20",
+      "target": "0x0",
+      "helper_symbol": "sceAtaExecCmdWrapper",
+      "helper_payload": "src/ataemu_patch.c"
+    },
+    {
+      "name": "ATAEmu: replace sceAtaExecCmd in read proxy with LBA48/custom HDD ID-aware implementation",
+      "type": "call32_target",
+      "vaddr": "0x1000df72",
+      "target": "0x0",
+      "helper_symbol": "sceAtaExecCmdWrapper",
+      "helper_payload": "src/ataemu_patch.c"
+    },
+    {
+      "name": "ATAEmu: replace sceAtaWaitResult call in the ATAEmu read command handler",
+      "type": "call32_target",
+      "vaddr": "0x1000df82",
+      "target": "0x0",
+      "helper_symbol": "sceAtaWaitResultWrapper",
+      "helper_payload": "src/ataemu_patch.c"
+    },
+    {
+      "name": "ATAEmu: replace nsector handling in write proxy to always pass the nsector value through instead of ceiling to 0x100",
+      "type": "raw",
+      "vaddr": "0x1000e0ec",
+      "expected": "e203",
+      "bytes": "9fa0"
+    },
+    {
+      "name": "ATAEmu: replace sceAtaExecCmd in write proxy with LBA48/custom HDD ID-aware implementation",
+      "type": "call32_target",
+      "vaddr": "0x1000e222",
+      "target": "0x0",
+      "helper_symbol": "sceAtaExecCmdWrapper",
+      "helper_payload": "src/ataemu_patch.c"
+    },
+    {
+      "name": "ATAEmu: replace sceAtaExecCmd in write proxy with LBA48/custom HDD ID-aware implementation",
+      "type": "call32_target",
+      "vaddr": "0x1000e276",
+      "target": "0x0",
+      "helper_symbol": "sceAtaExecCmdWrapper",
+      "helper_payload": "src/ataemu_patch.c"
+    },
+    {
+      "name": "ATAEmu: replace setupDMA in DMA proxy with LBA48-aware implementation",
+      "type": "call32_target",
+      "vaddr": "0x1000e4b6",
+      "target": "0x0",
+      "helper_symbol": "setupDMAWrapper",
+      "helper_payload": "src/ataemu_patch.c"
+    },
+    {
+      "name": "ATAEmu: replace sceAtaExecCmd in DMA proxy with LBA48/custom HDD ID-aware implementation",
+      "type": "call32_target",
+      "vaddr": "0x1000e524",
+      "target": "0x0",
+      "helper_symbol": "sceAtaExecCmdWrapper",
+      "helper_payload": "src/ataemu_patch.c"
+    },
+    {
+      "name": "ATAEmu: replace the IDENTIFY response patcher",
+      "type": "jmp32_target",
+      "vaddr": "0x1000de6a",
+      "target": "0x0",
+      "helper_symbol": "ataemuPatchIdentifyResponse",
+      "helper_payload": "src/ataemu_patch.c"
+    },
+    {
+      "name": "MISC: replace the default case handler in the MISC devctl 0x51?? command handler",
+      "type": "call32_target",
+      "vaddr": "0x100165aa",
+      "target": "0x0",
+      "helper_symbol": "miscDevctlCFWExtension",
+      "helper_payload": "src/misc_devctl_patch.c"
+    }
+  ]
+}

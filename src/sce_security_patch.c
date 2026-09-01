@@ -1,16 +1,13 @@
 /*
- * Implements the DVRP security workaround to make the console accept
- * non-original HDDs
+ * Implements the DVRP security workaround to make the console accept non-original HDDs
  *
  * https://gist.github.com/uyjulian/aa88872d2ebb2b569242eb56c1331dd5
  */
 
 #include "ata_fw_refs.h"
 #include "common_fw_refs.h"
+#include "sce_security_patch.h"
 #include "utron_syscalls.h"
-
-extern char HDDID_SRC[0x200];
-extern volatile int CMD_STATE;
 
 // Seeds the SPEED crypto engine and tricks it into unlocking the UDMA
 // communication by feeding the HDD ID
@@ -23,8 +20,7 @@ int unlockSPEED(int device, void *data) {
   wai_sem(3);
 
   // Send write memory command with HDD ID contents
-  res = sceAtaExecCmd(data, 1, 0, 0, 0, 0, 0, (device << 4) & 0xffff,
-                      ATA_C_WRITE_BUFFER);
+  res = sceAtaExecCmd(data, 1, 0, 0, 0, 0, 0, (device << 4) & 0xffff, ATA_C_WRITE_BUFFER);
   if (res != 0) {
     goto out;
   }
@@ -33,8 +29,7 @@ int unlockSPEED(int device, void *data) {
     goto out;
   }
   // Read back the data
-  res = sceAtaExecCmd(data, 1, 0, 0, 0, 0, 0, (device << 4) & 0xffff,
-                      ATA_C_READ_BUFFER);
+  res = sceAtaExecCmd(data, 1, 0, 0, 0, 0, 0, (device << 4) & 0xffff, ATA_C_READ_BUFFER);
   if (res != 0) {
     goto out;
   }
@@ -45,12 +40,10 @@ int unlockSPEED(int device, void *data) {
   ATA_HWPORT->r_sector = 0 & 0xff;
   ATA_HWPORT->r_lcyl = 0 & 0xff;
   ATA_HWPORT->r_hcyl = 0 & 0xff;
-  ATA_HWPORT->r_select =
-      (((((device & 1) ^ 1) << 4) & 0xffff) | ATA_SEL_LBA) & 0xff;
+  ATA_HWPORT->r_select = (((((device & 1) ^ 1) << 4) & 0xffff) | ATA_SEL_LBA) & 0xff;
   ATA_HWPORT->r_command = ATA_C_SCE_SECURITY_CONTROL & 0xff;
   // Immediately switch to primary device
-  ATA_HWPORT->r_select =
-      (((((device & 1) ^ 0) << 4) & 0xffff) | ATA_SEL_LBA) & 0xff;
+  ATA_HWPORT->r_select = (((((device & 1) ^ 0) << 4) & 0xffff) | ATA_SEL_LBA) & 0xff;
   res = sceAtaWaitResult();
 
 out:
@@ -70,29 +63,4 @@ int sceAtaGetSceIdWrapper(int device, void *data) {
   }
   // If failed, unlock the SPEED
   return unlockSPEED(device, data);
-}
-
-// Intercepts ATAEmu's sceAtaExecCmd() call to respond with the custom HDD ID
-int sceAtaExecCmdWrapper(void *buf, int blkcount, int feature, short nsector,
-                         short sector, short lcyl, short hcyl,
-                         unsigned short select, short cmd) {
-  if (cmd == 0x8e && feature == 0xec) {
-    CMD_STATE = 1;
-    memcpy(buf, HDDID_SRC, 0x200);
-    return 0;
-  }
-
-  return sceAtaExecCmd(buf, blkcount, feature, nsector, sector, lcyl, hcyl,
-                       select, cmd);
-}
-
-// Intercepts ATAEmu's sceAtaWaitResult() call to immediately return
-// if the sceAtaExecCmd interceptor was triggered before the call
-int sceAtaWaitResultWrapper(void) {
-  if (CMD_STATE != 0) {
-    CMD_STATE = 0;
-    return 0;
-  }
-
-  return sceAtaWaitResult();
 }
