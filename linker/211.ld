@@ -28,7 +28,7 @@ ATAEMU_CMD       = 0x1006a604;
 /* ATA emulator SPEED command queue location */
 ATAEMU_CMD_QUEUE = 0x10070074;
 /* atad device info location */
-ATAD_DEVICE_INFO = 0x10073fc0;
+ATAD_DEVICE_INFO = 0x10073fb8;
 /* MISC devctl buffer location */
 MISC_DEVCTL_BUF = 0x100d6720;
 
