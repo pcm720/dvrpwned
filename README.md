@@ -22,6 +22,7 @@ Brought to you by:
 - **DiscoStarslayer** - [FR60 Ghidra plugin](https://github.com/desrdev/ghidra-fr60) and documentation
 - **MonkeyBoyJoey** - extensive testing, validation and risking his PSX1 and PSX2 units
 - **GhostTownUS-** - testing and moral support
+- **Mathieulh** - PSX2 testing
 - **PS2SDK developers** - ps2atad implementation and SPEED register documentation, DESR reverse engineering
 
 ### In Memoriam

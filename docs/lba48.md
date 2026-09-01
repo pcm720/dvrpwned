@@ -19,7 +19,8 @@ The patched implementation intercepts `sceAtaExecCmd()` calls to:
 2. Route LBA48 commands to the LBA48 handler
 3. Maintain compatibility with existing LBA28 command processing
 
-DMA setup routine call in the original ATAEmu DMA handler is intercepted to correctly handle LBA48 sector counts.
+The DMA setup routine call in the original ATAEmu DMA handler is intercepted.  
+The 2.11 firmware natively supports LBA48 DMA transfers, so this part is left untouched.
 
 ## IDENTIFY response
 
