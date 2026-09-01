@@ -68,13 +68,6 @@
       "helper_payload": "src/ataemu_patch.c"
     },
     {
-      "name": "ATAEmu: patch the command handler to always call the patched LBA28 DMA handler instead of selecting between LBA28 and LBA48 handlers",
-      "type": "raw",
-      "vaddr": "0x1000e71e",
-      "expected": "4f04",
-      "bytes": "e00a"
-    },
-    {
       "name": "ATAEmu: replace sceAtaExecCmd in non-data proxy with LBA48-aware implementation",
       "type": "call32_target",
       "vaddr": "0x1000de1c",
@@ -132,22 +125,6 @@
       "name": "ATAEmu: replace sceAtaExecCmd in write proxy with LBA48/custom HDD ID-aware implementation",
       "type": "call32_target",
       "vaddr": "0x1000e276",
-      "target": "0x0",
-      "helper_symbol": "sceAtaExecCmdWrapper",
-      "helper_payload": "src/ataemu_patch.c"
-    },
-    {
-      "name": "ATAEmu: replace setupDMA in DMA proxy with LBA48-aware implementation",
-      "type": "call32_target",
-      "vaddr": "0x1000e4b6",
-      "target": "0x0",
-      "helper_symbol": "setupDMAWrapper",
-      "helper_payload": "src/ataemu_patch.c"
-    },
-    {
-      "name": "ATAEmu: replace sceAtaExecCmd in DMA proxy with LBA48/custom HDD ID-aware implementation",
-      "type": "call32_target",
-      "vaddr": "0x1000e524",
       "target": "0x0",
       "helper_symbol": "sceAtaExecCmdWrapper",
       "helper_payload": "src/ataemu_patch.c"
