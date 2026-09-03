@@ -193,36 +193,41 @@ int sceAtaWaitResultWrapper(void) {
 }
 
 void ataemuPatchIdentifyResponse(int device, unsigned short *buf) {
-  // Execute the original function to patch the reported number of total sectors
   unsigned int ps2AreaSectors = (&ATAD_DEVICE_INFO)[device].total_sectors;
   // Byte-swap total sectors
   unsigned short ps2AreaSectorsLo = (unsigned short)((ps2AreaSectors & 0xffff) >> 0x8) | (unsigned short)((ps2AreaSectors & 0xffff) << 0x8);
   unsigned short ps2AreaSectorsHi = (unsigned short)(ps2AreaSectors >> 0x18) | (unsigned short)((ps2AreaSectors >> 0x10) << 0x8);
 
+  // The commented patches, while making the response correct,
+  // break XMB 2.xx because it expects an LBA48-capable drive
+  // that reports the full drive capacity in the LBA48 sector count
+  //
   // Patch IDENTIFY response
-  if (ps2AreaSectors <= 0xFFFFFFF) {
-    // Set total LBA28 sectors
-    buf[ATA_ID_SECTOTAL_LO] = ps2AreaSectorsLo;
-    buf[ATA_ID_SECTOTAL_HI] = ps2AreaSectorsHi;
-    // Clear LBA48 total sectors
-    buf[ATA_ID_48BIT_SECTOTAL_LO] = 0x0;
-    buf[ATA_ID_48BIT_SECTOTAL_MI] = 0x0;
-    buf[ATA_ID_48BIT_SECTOTAL_HI] = 0x0;
-    buf[ATA_ID_48BIT_SECTOTAL_UI] = 0x0;
-    // Clear bit 10 of word 83 to remove the LBA48 flag
-    buf[ATA_ID_COMMAND_SETS_SUPPORTED] = buf[ATA_ID_COMMAND_SETS_SUPPORTED] & 0xFFFB;
+  // if (ps2AreaSectors <= 0xFFFFFFF) {
+  //   // Set total LBA28 sectors
+  //   buf[ATA_ID_SECTOTAL_LO] = ps2AreaSectorsLo;
+  //   buf[ATA_ID_SECTOTAL_HI] = ps2AreaSectorsHi;
+  //   // Clear LBA48 total sectors
+  //   buf[ATA_ID_48BIT_SECTOTAL_LO] = 0x0;
+  //   buf[ATA_ID_48BIT_SECTOTAL_MI] = 0x0;
+  //   buf[ATA_ID_48BIT_SECTOTAL_HI] = 0x0;
+  //   buf[ATA_ID_48BIT_SECTOTAL_UI] = 0x0;
+  //   // Clear bit 10 of word 83 to remove the LBA48 flag
+  //   buf[ATA_ID_COMMAND_SETS_SUPPORTED] = buf[ATA_ID_COMMAND_SETS_SUPPORTED] & 0xFFFB;
+  // } else {
+  //   // Set max LBA28
+  //   buf[ATA_ID_SECTOTAL_LO] = 0xffff;
+  //   buf[ATA_ID_SECTOTAL_HI] = 0xff0f;
+  //   // Overwrite LBA48 sectors to reflect the PS2 area size
+  //   buf[ATA_ID_48BIT_SECTOTAL_LO] = ps2AreaSectorsLo;
+  //   buf[ATA_ID_48BIT_SECTOTAL_MI] = ps2AreaSectorsHi;
+  //   buf[ATA_ID_48BIT_SECTOTAL_HI] = 0x0;
+  //   buf[ATA_ID_48BIT_SECTOTAL_UI] = 0x0;
+  // }
 
-  } else {
-    // Set max LBA28
-    buf[ATA_ID_SECTOTAL_LO] = 0xffff;
-    buf[ATA_ID_SECTOTAL_HI] = 0xff0f;
-    // Overwrite LBA48 sectors to reflect the PS2 area size
-    buf[ATA_ID_48BIT_SECTOTAL_LO] = ps2AreaSectorsLo;
-    buf[ATA_ID_48BIT_SECTOTAL_MI] = ps2AreaSectorsHi;
-    buf[ATA_ID_48BIT_SECTOTAL_HI] = 0x0;
-    buf[ATA_ID_48BIT_SECTOTAL_UI] = 0x0;
-  }
-
+  // Set total LBA28 sectors to the PS2 area size
+  buf[ATA_ID_SECTOTAL_LO] = ps2AreaSectorsLo;
+  buf[ATA_ID_SECTOTAL_HI] = ps2AreaSectorsHi;
   // Inject "PS2LBA48" ASCII into reserved words 121-124 (as "SPL2AB84")
   // to indicate that this firmware supports LBA48 for PS2 area
   buf[ATA_ID_DVRPCFW_ID_LO] = 0x5644;
