@@ -27,9 +27,11 @@ The 2.11 firmware natively supports LBA48 DMA transfers, so this part is left un
 The firmware modifies IDENTIFY responses to properly indicate LBA48 capabilities:
 
 - Injects "PS2LBA48" signature in reserved words 121-124 to indicate LBA48 support
-- For LBA48-capable drives: reports max LBA28 value (0xfffffff) while storing actual PS2 area size in LBA48 fields
-- For LBA28-only drives: uses standard `total_sectors` value from drive IDENTIFY response
-- Disables bit 10 of word 83 when PS2 area size fits in LBA28 to prevent LBA48-aware PS2 applications from using LBA48 commands
+- ~~For LBA48-capable drives: reports max LBA28 value (0xfffffff) while storing actual PS2 area size in LBA48 fields~~
+- ~~For LBA28-only drives: uses standard `total_sectors` value from drive IDENTIFY response~~
+- ~~Disables bit 10 of word 83 when PS2 area size fits in LBA28 to prevent LBA48-aware PS2 applications from using LBA48 commands~~
+
+Sector count patching was disabled because XMB 2.11 expects the DVRP to report the full drive capacity in the LBA48 sector count.
 
 ## Command table
 
