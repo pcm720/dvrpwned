@@ -201,6 +201,7 @@ void ataemuPatchIdentifyResponse(int device, unsigned short *buf) {
   // The commented patches, while making the response correct,
   // break XMB 2.xx because it expects an LBA48-capable drive
   // that reports the full drive capacity in the LBA48 sector count
+  // and PS2 area size in the LBA28 sector count
   //
   // Patch IDENTIFY response
   // if (ps2AreaSectors <= 0xFFFFFFF) {
@@ -228,6 +229,9 @@ void ataemuPatchIdentifyResponse(int device, unsigned short *buf) {
   // Set total LBA28 sectors to the PS2 area size
   buf[ATA_ID_SECTOTAL_LO] = ps2AreaSectorsLo;
   buf[ATA_ID_SECTOTAL_HI] = ps2AreaSectorsHi;
+  // Write the full PS2 area size to reserved words 125 and 126
+  buf[ATA_ID_DVRPCFW_PS2AREA_LO] = ps2AreaSectorsLo;
+  buf[ATA_ID_DVRPCFW_PS2AREA_HI] = ps2AreaSectorsHi;
   // Inject "PS2LBA48" ASCII into reserved words 121-124 (as "SPL2AB84")
   // to indicate that this firmware supports LBA48 for PS2 area
   buf[ATA_ID_DVRPCFW_ID_LO] = 0x5644;
@@ -259,6 +263,7 @@ void setupDMAWrapper(unsigned int type, unsigned int dir, void *buf, unsigned in
   case 0x35:
     dir = 0x1;
     maxSectorCount = 0x10000;
+    break;
   case 0xca:
     dir = 0x1;
     maxSectorCount = 0x100;
