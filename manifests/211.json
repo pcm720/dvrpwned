@@ -29,7 +29,7 @@
       "type": "raw",
       "vaddr": "0x1005f61c",
       "expected": "0206",
-      "bytes": "0520"
+      "bytes": "0521"
     },
     { "name": "Initialize CMD_STATE to 0",
       "type": "raw",

@@ -14,6 +14,10 @@
     {
       "source": "src/misc_devctl_patch.c",
       "vaddr": "0x100341b0"
+    },
+    {
+      "source": "src/xmb211_compat_patch.c",
+      "vaddr": "0x10034400"
     }
   ],
   "files": [
@@ -29,7 +33,7 @@
       "type": "raw",
       "vaddr": "0x10031ef0",
       "expected": "0209",
-      "bytes": "0520"
+      "bytes": "0521"
     },
     { "name": "Initialize CMD_STATE to 0",
       "type": "raw",
@@ -153,75 +157,23 @@
       "helper_symbol": "ataemuPatchIdentifyResponse",
       "helper_payload": "src/ataemu_patch.c"
     },
-    { "name": "ATAEmu: enable command 0x24 (READ SECTORS EXT)",
+    {
+      "name": "ATAEmu: enable LBA48 commands",
       "type": "raw",
-      "vaddr": "0x1002ff00",
-      "expected": "00000000",
-      "bytes": "00000001"
-    },
-    { "name": "ATAEmu: enable command 0x25 (READ DMA EXT)",
-      "type": "raw",
-      "vaddr": "0x1002ff10",
-      "expected": "00000000",
-      "bytes": "00000001"
-    },
-    { "name": "ATAEmu: enable command 0x26 (READ DMA QUEUED EXT)",
-      "type": "raw",
-      "vaddr": "0x1002ff20",
-      "expected": "00000000",
-      "bytes": "00000001"
-    },
-    { "name": "ATAEmu: enable command 0x27 (READ NATIVE MAX ADDRESS EXT)",
-      "type": "raw",
-      "vaddr": "0x1002ff30",
-      "expected": "00000000",
-      "bytes": "00000001"
-    },
-    { "name": "ATAEmu: enable command 0x29 (READ MULTIPLE EXT)",
-      "type": "raw",
-      "vaddr": "0x1002ff50",
-      "expected": "00000000",
-      "bytes": "00000001"
-    },
-    { "name": "ATAEmu: enable command 0x2F (READ LOG EXT)",
-      "type": "raw",
-      "vaddr": "0x1002ffb0",
-      "expected": "00000000",
-      "bytes": "00000001"
-    },
-    { "name": "ATAEmu: enable command 0x34 (WRITE SECTORS EXT)",
-      "type": "raw",
-      "vaddr": "0x10030000",
-      "expected": "00000000",
-      "bytes": "00000001"
-    },
-    { "name": "ATAEmu: enable command 0x35 (WRITE DMA EXT)",
-      "type": "raw",
-      "vaddr": "0x10030010",
-      "expected": "00000000",
-      "bytes": "00000001"
-    },
-    { "name": "ATAEmu: enable command 0x36 (WRITE DMA QUEUED EXT)",
-      "type": "raw",
-      "vaddr": "0x10030020",
-      "expected": "00000000",
-      "bytes": "00000001"
-    },
-    { "name": "ATAEmu: enable command 0x37 (SET MAX ADDRESS EXT)",
-      "type": "raw",
-      "vaddr": "0x10030030",
-      "expected": "00000000",
-      "bytes": "00000001"
-    },
-    { "name": "ATAEmu: enable command 0x39 (WRITE MULTIPLE EXT)",
-      "type": "raw",
-      "vaddr": "0x10030050",
-      "expected": "00000000",
-      "bytes": "00000001"
-    },
-    { "name": "ATAEmu: enable command 0x3F (WRITE LOG EXT)",
-      "type": "raw",
-      "vaddr": "0x100300b0",
+      "vaddr": [
+        "0x1002ff00",
+        "0x1002ff10",
+        "0x1002ff20",
+        "0x1002ff30",
+        "0x1002ff50",
+        "0x1002ffb0",
+        "0x10030000",
+        "0x10030010",
+        "0x10030020",
+        "0x10030030",
+        "0x10030050",
+        "0x100300b0"
+      ],
       "expected": "00000000",
       "bytes": "00000001"
     },
@@ -232,6 +184,14 @@
       "target": "0x0",
       "helper_symbol": "miscDevctlCFWExtension",
       "helper_payload": "src/misc_devctl_patch.c"
+    },
+    {
+      "name": "DVR: replace devctl default handler for 0x?1?? commands",
+      "type": "jmp32_target",
+      "vaddr": "0x1000f74c",
+      "target": "0x0",
+      "helper_symbol": "dvrDevctlDefaultHandlerReplacement",
+      "helper_payload": "src/xmb211_compat_patch.c"
     }
   ]
 }
