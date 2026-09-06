@@ -9,5 +9,7 @@
 
 extern void *memcpy(void *dst, const void *src, unsigned int n);
 extern void *memset(void *s, int c, unsigned int n);
+extern int sprintf(char *dst, const char *fmt, ...);
+extern int strlen(const char *s);
 
 #endif
