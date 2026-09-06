@@ -6,6 +6,7 @@ This custom firmware:
 - bypasses the HDD ID security check that previously restricted PSX to only original Sony HDDs supporting proprietary commands or adapters that support the proprietary IDENTIFY command
 - adds full LBA48 support for the PS2 area (up to 2TB)
 - adds custom devctl commands
+- fixes recordings disappearing when using XMB 2.11 on PSX1
 
 With the custom firmware, almost any HDD can be used with:
 
